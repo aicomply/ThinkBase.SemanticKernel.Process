@@ -1,7 +1,7 @@
 # ThinkBase.SemanticKernel.Process
 Microsoft Semantic Kernel enables the development of Agentic AI.
 
-This comes in two flavors: Agents and Processes.
+In the samantic Kernel, Agentic AI  comes in two flavors: Agents and Processes.
 
 While processes are less stable than the agent solution, they have the benefit of being more controllable: the processing and calling of agents is determined by a state machine, rather than a controlling agent.
 
@@ -44,7 +44,11 @@ flowchart LR
 ```
 This diagram shows how the demo is arranged. The IntentStep acts as a manager and determines if the users input is a request for the knowledge graph, or a general request. If the latter, the query is passed to the Interaction step which gets the selected LLM to respond, after which the process ends.
 If the former, the knowledge graph step is called. The selected Knowledge graph is interrogated via the ThinkBase GraphQL API, and a response is generated. These responses are objects, rather than plain text, and contain formatting and status information as well as the texual response.
-The intentStep passes all subsequent responses on to the ThinkBaseStep until either a watchdog count of cycles is exceeded or the object returned from the ThinkBase API indicates the process is complete. Typically the last reponse of the Knowledge Graph is a response containing 
+The intentStep passes all subsequent responses on to the ThinkBaseStep until either a watchdog count of cycles is exceeded or the object returned from the ThinkBase API indicates the process is complete. Typically the last reponse of the Knowledge Graph is a response containing a report or one or more data values.
+
+In this demo the ThinkBase Knowledge graph formatting and data types are used directly to create the user interface elements, such as lists of possible responses presented as button, text or links.  There is nothing to prevent the developer from using the returned json directly with an LLM, and we'll consider this for a later demo.
+
+
 
 
 
