@@ -5,12 +5,16 @@ In the samantic Kernel, Agentic AI  comes in two flavors: Agents and Processes.
 
 While processes are less stable than the agent solution, they have the benefit of being more controllable: the processing and calling of agents is determined by a state machine, rather than a controlling agent.
 
+## ThinkBase
+
 [ThinkBase](https://thinkbase.ai) is a SaaS system that permits the creation of dynamic knowledge graphs. These are directed networks that contain fuzzy logic rule sets on the nodes that can determine the course of traversals accross the network and determine tha value of data items transferred.
 
 ThinkBase knowledge graphs can be created by hand or by machine learning. They represent a way to encapsulate knowledge that is human-understandable, auditable and reproducible.
 
 Using this code, you can add processing that is completely deterministic and transparent into a conversation with a user that can generate data items for further processing by LLMs.
 Thus, you can build Agentic AI systems that will pass compliance requirements, such as the EU's AI act, without expensive and time consuming testing.
+
+## This repository
 
 This repository contains A semantic kernel process step, essentially a processing step that can be incorporated into many other processes, and a website demonstrating functionality.
 To use this step you will need to have an account at [ThinkBase](https://thinkbase.ai) which is inexpensive for low volume users.
@@ -20,6 +24,8 @@ If the data items are not known, the inference engine will ask the user to fill 
 
 The ThinkBase process step defines a couple of events. One calling for more data, and the other reporting the process has completed. To integrate the ThinkBase Step into your processes, you need only call the step, and reroute all responses to that step until the exit event is generated.
 The step uses ChatHistory to pass new requests to the user. The process pauses until data is returned. 
+
+## The demo website
 
 In order to demonstrate this, a demo website is included. This can be seen running at:
 
