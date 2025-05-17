@@ -16,7 +16,7 @@ Thus, you can build Agentic AI systems that will pass compliance requirements, s
 
 ## This repository
 
-This repository contains A semantic kernel process step, essentially a processing step that can be incorporated into many other processes, and a website demonstrating functionality.
+This repository contains a semantic kernel process step, essentially a processing step that can be incorporated into many other processes, and a website demonstrating functionality.
 To use this step you will need to have an account at [ThinkBase](https://thinkbase.ai) which is inexpensive for low volume users.
 
 Interrogating a ThinkBase Knowledge graph involves selecting a target node - normally there is only one logical choice - and running the inference process on the network. This determines which data items are needed to satisfy the target node, and prioritises them according to their importance (salience) in satifying the node.
@@ -27,17 +27,21 @@ The step uses ChatHistory to pass new requests to the user. The process pauses u
 
 ## The demo website
 
-In order to demonstrate this, a demo website is included. This can be seen running at:
+In order to demonstrate this, a demo website is included. This can be seen running at:[https://semanticdemo.thinkbase.ai](https://semanticdemo.thinkbase.ai)
 
-This uses two other AI Compliance open source blazor components in order to create a chat interface. ThinkBase will often offer multiple choices when asking a question. These are represented in this demo as AdaptiveCards, which are compatible with the Microsoft Bot Framework, and Microsoft Teams, etc.
+This uses two other of our open source blazor components in order to create a chat interface. 
 
-Chat interfaces, like the bot Framework, Teams chat, and the Microsoft.Extensions.AI ChatClient have a call/response model. Semantic Kernel processes are oriented towards a pub/sub model, where the agent's reponse can be completely decoupled from the user request that caused it. This is necessary, because Semantic Kernel processes can be run in a distributed fashion. However, in this example we will use the local process runtime. 
+ThinkBase will often offer multiple choices when asking a question. These are represented in this demo as [AdaptiveCards](https://adaptivecards.io/), which are compatible with the Microsoft Bot Framework, and Microsoft Teams, etc.
+
+Chat interfaces, like the Bot Framework, Teams chat, and the [Microsoft.Extensions.AI](https://github.com/dotnet/extensions/tree/main/src/Libraries/Microsoft.Extensions.AI) ChatClient have a call/response model. Semantic Kernel processes are oriented towards a pub/sub model, where the agent's reponse can be completely decoupled from the user request that caused it. This is necessary, because Semantic Kernel processes can be run in a distributed fashion. However, in this example we will use the local process runtime. 
 
 ```mermaid
 flowchart LR
     Start["Start"]
     End["End"]
     IntentStep["IntentStep"]
+    IntentStep["IntentStep"] --> InteractionStep["InteractionStep"]
+    IntentStep["IntentStep"] --> ThinkBaseStep["ThinkBaseStep"]
     ThinkBaseStep["ThinkBaseStep"]
     ThinkBaseStep["ThinkBaseStep"] --> IntentStep["IntentStep"]
     ThinkBaseStep["ThinkBaseStep"] --> End["End"]
@@ -49,10 +53,11 @@ flowchart LR
     InteractionStep["InteractionStep"] --> End
 ```
 This diagram shows how the demo is arranged. The IntentStep acts as a manager and determines if the users input is a request for the knowledge graph, or a general request. If the latter, the query is passed to the Interaction step which gets the selected LLM to respond, after which the process ends.
-If the former, the knowledge graph step is called. The selected Knowledge graph is interrogated via the ThinkBase GraphQL API, and a response is generated. These responses are objects, rather than plain text, and contain formatting and status information as well as the texual response.
+If the former, the knowledge graph step is called. The selected knowledge graph is interrogated via the ThinkBase GraphQL API, and a response is generated. These responses are objects, rather than plain text, and contain formatting and status information as well as the texual response.
 The intentStep passes all subsequent responses on to the ThinkBaseStep until either a watchdog count of cycles is exceeded or the object returned from the ThinkBase API indicates the process is complete. Typically the last reponse of the Knowledge Graph is a response containing a report or one or more data values.
 
 In this demo the ThinkBase Knowledge graph formatting and data types are used directly to create the user interface elements, such as lists of possible responses presented as button, text or links.  There is nothing to prevent the developer from using the returned json directly with an LLM, and we'll consider this for a later demo.
+ThinkBase generates rich responses, including possibilistic certainty information with scores for each generated category for categorical outputs, tolerance values presented as fuzzy sets for numeric values, and rich text formatting for textual results based on Markdown., 
 
 
 
