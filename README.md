@@ -22,7 +22,9 @@ To use this step you will need to have an account at [ThinkBase](https://thinkba
 Interrogating a ThinkBase Knowledge graph involves selecting a target node - normally there is only one logical choice - and running the inference process on the network. This determines which data items are needed to satisfy the target node, and prioritises them according to their importance (salience) in satifying the node.
 If the data items are not known, the inference engine will ask the user to fill them in, one at a time, and in order of salience. This creates a conversation with the user. As each data item is recieved, the inference process is repeated, and any data items made redundant by the answer are removd from the queue.
 
-The ThinkBase process step defines a couple of events. One calling for more data, and the other reporting the process has completed. To integrate the ThinkBase Step into your processes, you need only call the step, and reroute all responses to that step until the exit event is generated.
+The ThinkBase process step encapsulates and interrogates a knowledge graph existing in the developer's account on the ThinkBase SaaS site.
+
+The ThinkBase process code step defines a couple of events. One calling for more data, and the other reporting the process has completed. To integrate the ThinkBase Step into your processes, you need only call the step, and reroute all responses to that step until the exit event is generated.
 The step uses ChatHistory to pass new requests to the user. The process pauses until data is returned. 
 
 ## The demo website
