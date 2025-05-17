@@ -1,7 +1,7 @@
 # ThinkBase.SemanticKernel.Process
 Microsoft Semantic Kernel enables the development of Agentic AI.
 
-In the samantic Kernel, Agentic AI  comes in two flavors: Agents and Processes.
+In the semantic Kernel, Agentic AI  comes in two flavors: Agents and Processes.
 
 While processes are less stable than the agent solution, they have the benefit of being more controllable: the processing and calling of agents is determined by a state machine, rather than a controlling agent.
 
