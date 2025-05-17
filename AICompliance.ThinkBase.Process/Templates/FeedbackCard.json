@@ -1,0 +1,51 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.0",
+  "body": [
+
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Please give us feedback",
+          "weight": "bolder",
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "We want to make this audit better. Do you disagree with the results? Have we not covered the kind of AI you use or a jurisdiction you are interested in?",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "If you report a bug or give us an update that we can use we will send you a token for a free audit.",
+          "wrap": true
+        },
+        {
+          "type": "Input.Text",
+          "id": "feedback",
+          "isMultiline": true,
+          "placeholder": "Give your feedback"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Send feedback"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "Download your report as a pdf",
+      "url": "$link"
+    }
+  ]
+}

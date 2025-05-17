@@ -1,0 +1,15 @@
+{
+  "type": "AdaptiveCard",
+  "version": "1.0",
+  "body": [
+    {
+      "type": "TextBlock",
+      "size": "medium",
+      "weight": "bolder",
+      "text": "**text**"
+    }
+  ],
+  "actions": [
+    **CategoryButtons**
+  ]
+}

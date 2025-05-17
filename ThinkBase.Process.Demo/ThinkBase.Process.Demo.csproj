@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>5313e504-c7d2-426f-bbc7-78205920a2ec</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AIComply.Blazor.Chat" Version="1.0.1" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.11.9" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.11.9" />
+    <PackageReference Include="Microsoft.SemanticKernel.Process.Core" Version="1.50.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Process.LocalRuntime" Version="1.50.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.50.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.50.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Plugins.OpenApi.Extensions" Version="1.50.0-alpha" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AICompliance.ThinkBase.Process\AICompliance.ThinkBase.Process.csproj" />
+  </ItemGroup>
+</Project>
