@@ -18,6 +18,8 @@ namespace ThinkBase.Process.Demo
             builder.Services.AddFluentUIComponents();
             builder.Services.AddSingleton<IChatClient, ChatClient>();
             builder.Services.AddSingleton<IProcessFactory, IntentProcess>();
+            builder.Services.AddBlazorAdaptiveCards();
+
 
             var app = builder.Build();
 

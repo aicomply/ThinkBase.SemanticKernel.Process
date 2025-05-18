@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace AICompliance.ThinkBase.Process.Models
 {
-    public class ResponseEnvelope
+    public class KGraphData
     {
-        public List<InteractResponse> interactKnowledgeGraph { get; set; } = [];
+        public string name { get; set; } = string.Empty;
+        public string kgSource { get; set; } = string.Empty;
     }
 }

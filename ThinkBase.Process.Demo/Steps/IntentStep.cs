@@ -69,11 +69,11 @@ public class IntentStep : KernelProcessStep<IntentStepState>
             logger.LogInformation($"*** IntentStep inferred {userInput.Content} was a request for Interaction handling");
             await context.EmitEventAsync(new() { Id = Events.InteractionRequest });
         }
-        else if (formattedResponse!.Compliance)
+        else if (formattedResponse!.KnowledgeGraph)
         {
             _state.InSubProcess = true;
             _state.NextEvent = ThinkBaseStepEvents.ThinkBaseInteract;
-            logger.LogInformation($"*** IntentStep inferred {userInput.Content} was a request for Compliance info");
+            logger.LogInformation($"*** IntentStep inferred {userInput.Content} was a request for KG info");
             await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.ThinkBaseInteract, Data = history });
         }
     }
@@ -84,17 +84,8 @@ public class IntentStep : KernelProcessStep<IntentStepState>
         [Description("Specifies that the user's input is a simple interaction such as hello. ")]
         public bool Interaction { get; set; }
         [Description("Specifies that the user's input is a request for general information. ")]
-        public bool Information { get; set; }
-        [Description("Specifies that the user's input is a request to access email services. ")]
-        public bool Email { get; set; }
-        [Description("Specifies that the user's input is a request to access calendar and event services. ")]
-        public bool Calendar { get; set; }
-        [Description("Specifies that the user's input is a request to access task list services. ")]
-        public bool TaskList { get; set; }
-        [Description("Specifies that the user's input is a request to obtain an audit of an AI solution. ")]
-        public bool Audit { get; set; }
-        [Description("Specifies that the user's input is a request to obtain Compliance information. ")]
-        public bool Compliance{ get; set; }
+        public bool KnowledgeGraph { get; set; }
+
     }
 
 

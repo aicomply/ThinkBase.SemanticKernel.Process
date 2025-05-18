@@ -1,6 +1,9 @@
 ﻿using AICompliance.ThinkBase.Process.Models;
 using AICompliance.ThinkBase.Process.Steps;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Services;
 using ThinkBase.Process.Demo.Models;
 using ThinkBase.Process.Demo.Steps;
 
@@ -12,6 +15,27 @@ namespace ThinkBase.Process.Demo.Processes
 
     public class IntentProcess : AbstractProcess
     {
+
+        private readonly ILogger<IntentProcess> _logger;
+        private readonly Kernel _kernel;
+        private readonly IConfiguration _config;
+        private readonly ChatHistorySummarizationReducer _historyReducer;
+
+        public IntentProcess(ILogger<IntentProcess> logger, IConfiguration config)
+        {
+            _logger = logger;
+            _config = config;
+            ChatHistory history = [];
+            IKernelBuilder builder = Kernel.CreateBuilder()
+            .AddAzureOpenAIChatCompletion(config["AzureOpenAI:DeploymentName"]!, config["AzureOpenAI:Endpoint"]!, config["AzureOpenAI:ApiKey"]!);
+            builder.Services.AddLogging(s => s.AddConsole().SetMinimumLevel(LogLevel.Trace));
+            builder.Services.AddSingleton<IConfiguration>(config);
+            builder.Services.AddSingleton<IChatHistoryProvider>(new ChatHistoryProvider(history));
+            _kernel = builder.Build();
+            _historyReducer = new ChatHistorySummarizationReducer(_kernel.GetRequiredService<IChatCompletionService>(), 3, 3);
+        }
+
+
         public override ProcessBuilder GetProcessBuilder()
         {
             ProcessBuilder process = new("intent");
@@ -23,7 +47,17 @@ namespace ThinkBase.Process.Demo.Processes
             process.OnInputEvent(Events.StartProcess)
                 .SendEventTo(new ProcessFunctionTargetBuilder(intentStep, IntentStep.Functions.InvokeAgent));
 
+            AttachErrorStep(
+                intentStep,
+                IntentStep.Functions.InvokeAgent);
 
+            intentStep
+                 .OnEvent(Events.InteractionRequest)
+                 .SendEventTo(new ProcessFunctionTargetBuilder(interactStep));
+
+            intentStep
+                .OnEvent(ThinkBaseStepEvents.ThinkBaseInteract)
+                .SendEventTo(new ProcessFunctionTargetBuilder(thinkbaseStep));
 
             thinkbaseStep
                 .OnEvent(ThinkBaseStepEvents.Exit)
@@ -38,16 +72,36 @@ namespace ThinkBase.Process.Demo.Processes
             .OnEvent(Events.Exit)
             .StopProcess();
 
+            void AttachErrorStep(ProcessStepBuilder step, params string[] functionNames)
+            {
+                foreach (string functionName in functionNames)
+                {
+                    step
+                        .OnFunctionError(functionName)
+                        .StopProcess();
+                }
+            }
 
             return process;
         }
-        public override Task<BotResponse> InteractAsync(BotResponse message, KernelProcess? chatProcess)
+        public override async Task<BotResponse> InteractAsync(BotResponse message, KernelProcess? chatProcess)
         {
-            throw new NotImplementedException();
+            var rep = await StartProcessAsync(chatProcess!, message);
+            var history = await _kernel.Services.GetRequiredService<IChatHistoryProvider>().GetHistoryAsync();
+            var bresp = new BotResponse { Content = history.Last().Content!, ContentType = BotResponseContentType.Text };
+            var reducedMessages = await _historyReducer!.ReduceAsync(history);
+            if (reducedMessages is not null)
+            {
+                history.Clear();
+                history.AddRange(reducedMessages);
+            }
+            return bresp;
         }
-        public override Task<LocalKernelProcessContext> StartProcessAsync(KernelProcess kernelProcess, BotResponse initialText)
+
+        public override async Task<LocalKernelProcessContext> StartProcessAsync(KernelProcess kernelProcess, BotResponse initialText)
         {
-            throw new NotImplementedException();
+            var initialEvent = new KernelProcessEvent { Id = Events.StartProcess, Data = initialText };
+            return await kernelProcess.StartAsync(_kernel, initialEvent);
         }
     
     }

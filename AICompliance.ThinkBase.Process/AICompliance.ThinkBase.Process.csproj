@@ -7,6 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="MarkDown\footer.md" />
+    <None Remove="MarkDown\header.md" />
+    <None Remove="Templates\Categories.json" />
+    <None Remove="Templates\FeedbackCard.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="MarkDown\footer.md" />
+    <EmbeddedResource Include="MarkDown\header.md" />
+    <EmbeddedResource Include="Templates\Categories.json" />
+    <EmbeddedResource Include="Templates\FeedbackCard.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
     <PackageReference Include="GraphQL.Client" Version="6.1.0" />
     <PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.1.0" />
