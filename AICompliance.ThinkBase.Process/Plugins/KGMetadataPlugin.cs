@@ -1,20 +1,29 @@
-﻿using AICompliance.ThinkBase.Process.Models;
+﻿// Copyright (c) 2025 AI Compliance inc. Licensed under the MIT License.
+using AICompliance.ThinkBase.Process.Models;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using System.ComponentModel;
 using System.Data.Common;
+using System.Linq;
+using System.Reflection;
 
 namespace AICompliance.ThinkBase.Process.Plugins
 {
+    /// <summary>
+    /// Plugin to list the Knowledge graphs available and supply a description of each so that the LLM can match the request to the KG.
+    /// </summary>
     public class KGMetadataPlugin
     {
         private readonly IConfiguration _config;
         private readonly GraphQLHttpClient _client;
-        public KGMetadataPlugin(IConfiguration config)
+        private readonly ILogger _logger;
+        public KGMetadataPlugin(IConfiguration config, ILogger logger)
         {
             _config = config;
+            _logger = logger;
             _client = new GraphQLHttpClient(config["APIAddress"]!, new SystemTextJsonSerializer());
         }
 
@@ -22,24 +31,22 @@ namespace AICompliance.ThinkBase.Process.Plugins
         [Description("Get Knowledge Graph information")]
         public async Task<List<KGMetadata>> GetKGInfoAsync()
         {
+            _logger.LogInformation("Getting KGraph metadata");
+            //TODO cache this data
             string metadataquery =
                     """
-                    query ($name: String! )
+                    query 
                     {
-                        getKGraphMetaData(name: $name)
+                        getKGraphMetaData(name: "$name")
                         {
                             name 
                             model
                             {
-                                author 
-                                copyright 
                                 description 
                                 initialText 
-                                licenseUrl 
-                                defaultTarget
-                               }
                             }
-                        }         
+                        }   
+                    }
                     """;
             var kgsquery = """"
                 query 
@@ -61,18 +68,41 @@ namespace AICompliance.ThinkBase.Process.Plugins
                 apikey = _config["APIKey"]!
             };
             var responses = await _client.SendQueryAsync<KGraphsResponse>(req);
-            foreach (var kg in responses.Data.kgraphs.Where( a => a.kgSource == "TEAM"))
+            if (responses.Errors != null && responses.Errors.Length > 0)
             {
-                var req2 = new GraphQLHttpThinkBaseRequest()
+                _logger.LogError("Error getting KGraph list: {0}", responses.Errors[0].Message);
+                return metadata;
+            }
+            var teamResponses = responses.Data.kgraphs.Where(a => a.kgSource == "TEAM");
+            _logger.LogInformation("Got KGraph list: {0}", teamResponses.Count());
+            foreach (var kg in teamResponses)
+            {
+                var name = kg.name;
+                try
                 {
-                    Variables = new { name = kg.name },
-                    Query = metadataquery,
-                    apikey = _config["APIKey"]!
-                };
-                var responses2 = await _client.SendQueryAsync<KGMetadataResponse>(req2);
-                if (responses2.Data != null)
+                    var req2 = new GraphQLHttpThinkBaseRequest()
+                    {
+                        Query = metadataquery.Replace("$name",name),
+                        apikey = _config["APIKey"]!
+                    };
+                    var responses2 = await _client.SendQueryAsync<KGMetadataResponse>(req2);
+                    if (responses2.Errors != null && responses2.Errors.Length > 0)
+                    {
+                        _logger.LogError("Error getting KGraph metadata: {0}", responses2.Errors[0].Message);
+                        return metadata;
+                    }
+                    if (responses2.Data != null && responses2.Data.getKGraphMetaData != null && !string.IsNullOrEmpty(responses2.Data.getKGraphMetaData!.model.description))
+                    {
+                        if(!metadata.Any(a => a.Name == name))
+                        {
+                            _logger.LogInformation("Got KGraph metadata for: {0}", name);
+                            metadata.Add(new KGMetadata { Name = name, Description = responses2.Data.getKGraphMetaData!.model.description, InitialText = responses2.Data.getKGraphMetaData.model.initialText });
+                        }
+                    }
+                }
+                catch (Exception ex)
                 {
-                    metadata.Add( new KGMetadata { Name = kg.name, Description = responses2.Data.getKGraphMetaData!.model.description, InitialText = responses2.Data.getKGraphMetaData.model.initialText });
+                    _logger.LogError("Error getting KGraph metadata for: {0}", name);
                 }
             }
             return metadata;

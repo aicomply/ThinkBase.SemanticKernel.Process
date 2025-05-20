@@ -1,10 +1,11 @@
-﻿using AICompliance.ThinkBase.Process.Models;
+﻿// Copyright (c) 2025 AI Compliance inc. Licensed under the MIT License.
+
+using AICompliance.ThinkBase.Process.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using GraphQL.Client.Http;
-using GraphQL;
 using System.Reflection;
 using Azure.Storage.Blobs;
 using Orionsoft.MarkdownToPdfLib;
@@ -37,19 +38,20 @@ namespace AICompliance.ThinkBase.Process.Steps
         }
 
         [KernelFunction(Functions.Interact)]
-        protected async ValueTask InteractFunctionAsync(KernelProcessStepContext context, Kernel kernel, ILogger logger, ChatHistory history)
+        protected async ValueTask InteractFunctionAsync(KernelProcessStepContext context, Kernel kernel, ILogger logger, TBMessage message)
         {
             try { 
                 string text = string.Empty;
                 var config = kernel.GetRequiredService<IConfiguration>();
                 if (_state.ChatHistory!.Count == 0)
                 {
-                    text = config["GraphPrompt"]!;
+                    text = message.InitialPrompt!;
+                    message.History.AddAssistantMessage(KGPrompts.InitialKGText);
                     logger.LogInformation($"Started a new ThinkBaseStep. id: {_state.ConversationId}");
                 }
                 else
                 {
-                    text = history.Last().ToString();
+                    text = message.History.Last().ToString();
                     _state.ChatHistory.AddUserMessage(text);
                     logger.LogInformation($"In a ThinkBaseStep iteration. id: {_state.ConversationId}, text: {text}");
 
@@ -58,7 +60,7 @@ namespace AICompliance.ThinkBase.Process.Steps
                 {
                     client = new GraphQLHttpClient(config["APIAddress"]!, new SystemTextJsonSerializer());
                 }
-                var modelName = config["Graph"];
+                var modelName = message.GraphName;
 
                 string query =
                     $$"""
@@ -100,13 +102,13 @@ namespace AICompliance.ThinkBase.Process.Steps
                     {
                         _state.ChatHistory!.AddAssistantMessage(outText);
                     }
-                    history.AddAssistantMessage( outText);
+                    message.History.AddAssistantMessage( outText);
                     logger.LogInformation($"In ThinkBaseStep. Interaction response: {outText} ");
                 }
                 if (_state.Complete || _state.Cycles > MaxCycles)
                 {
                     logger.LogInformation($"In ThinkBaseStep. Interactions completed. ");
-                    await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.Exit, Data = history });
+                    await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.Exit, Data = message.History });
                     _state.ChatHistory.Clear();
                     _state.Complete = false;
                     _state.Cycles = 0;
@@ -115,14 +117,14 @@ namespace AICompliance.ThinkBase.Process.Steps
                 {
                     _state.Cycles++;
                     logger.LogInformation($"In ThinkBaseStep. Interactions ongoing. ");
-                    await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.ThinkBaseInteract, Data = history }); 
+                    await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.ThinkBaseInteract, Data = message.History }); 
                 }
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error in InteractFunctionAsync");
-                history.AddAssistantMessage("Error in InteractFunctionAsync: " + ex.Message);
-                await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.Exit, Data = history });
+                message.History.AddAssistantMessage("Error in InteractFunctionAsync: " + ex.Message);
+                await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.Exit, Data = message.History });
             }
 
         }

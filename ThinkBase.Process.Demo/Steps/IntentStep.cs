@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 using AICompliance.ThinkBase.Process.Models;
+using AICompliance.ThinkBase.Process.Plugins;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Services;
 using System.ComponentModel;
 using System.Text.Json;
 using ThinkBase.Process.Demo.Models;
@@ -47,7 +49,7 @@ public class IntentStep : KernelProcessStep<IntentStepState>
 
         if (_state!.InSubProcess)
         {
-            await context.EmitEventAsync(new() { Id = _state.NextEvent!, Data = history});
+            await context.EmitEventAsync(new() { Id = _state.NextEvent!, Data = new TBMessage { History = history, GraphName = _state.GraphName, InitialPrompt = _state.InitialText } });
             logger.LogInformation($"*** IntentStep is in a sub-process, handing over to {_state.NextEvent!} and passing history.");
             return;
         }
@@ -59,10 +61,16 @@ public class IntentStep : KernelProcessStep<IntentStepState>
         };
         OpenAIPromptExecutionSettings settings = new OpenAIPromptExecutionSettings();
         settings.ResponseFormat = typeof(IntentResponse);
-
+        settings.FunctionChoiceBehavior = FunctionChoiceBehavior.Auto();
+        settings.Temperature = 0.0f;
+        // Add the KGMetaData plugin
+        var config = kernel.GetRequiredService<IConfiguration>();
+        var kgplugin = new KGMetadataPlugin(config, logger);
+        kernel.ImportPluginFromObject(kgplugin, nameof(KGMetadataPlugin));
         IChatCompletionService chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
-        var proofreadResponse = await chatCompletionService.GetChatMessageContentAsync(localChatHistory, executionSettings: settings);
-        var formattedResponse = JsonSerializer.Deserialize<IntentResponse>(proofreadResponse.Content!.ToString());
+        var intentResponse = await chatCompletionService.GetChatMessageContentAsync(localChatHistory, executionSettings: settings, kernel: kernel);
+        var formattedResponse = JsonSerializer.Deserialize<IntentResponse>(intentResponse.Content!.ToString());
+        //remove the plugin
         //Some of these next steps are possibly multi  pass. Where this is true, set the appropriate event to return to them if required in _state.
         if (formattedResponse!.Interaction)
         {
@@ -74,8 +82,13 @@ public class IntentStep : KernelProcessStep<IntentStepState>
             _state.InSubProcess = true;
             _state.NextEvent = ThinkBaseStepEvents.ThinkBaseInteract;
             logger.LogInformation($"*** IntentStep inferred {userInput.Content} was a request for KG info");
-            await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.ThinkBaseInteract, Data = history });
+            //extract the name and initial text and pass on.
+            _state.GraphName = formattedResponse.Name;
+            _state.InitialText = formattedResponse.InitialText;
+            await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.ThinkBaseInteract, Data = new TBMessage { History = history, GraphName = formattedResponse.Name, InitialPrompt = formattedResponse.InitialText } });
         }
+        kernel.Plugins.Remove(kernel.Plugins[nameof(KGMetadataPlugin)]);
+
     }
 
 
@@ -83,8 +96,15 @@ public class IntentStep : KernelProcessStep<IntentStepState>
     {
         [Description("Specifies that the user's input is a simple interaction such as hello. ")]
         public bool Interaction { get; set; }
-        [Description("Specifies that the user's input is a request for general information. ")]
+
+        [Description("Specifies that the user's input is a request for one of the knowledge graphs. ")]
         public bool KnowledgeGraph { get; set; }
+
+        [Description("Specifies the name of the Knowledge graph to use. ")]
+        public string Name { get; set; } = string.Empty;
+
+        [Description("Specifies the initial text to send to the Knowledge Graph. ")]
+        public string InitialText { get; set; } = string.Empty;
 
     }
 

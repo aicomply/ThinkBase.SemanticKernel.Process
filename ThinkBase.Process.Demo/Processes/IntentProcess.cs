@@ -84,18 +84,52 @@ namespace ThinkBase.Process.Demo.Processes
 
             return process;
         }
-        public override async Task<BotResponse> InteractAsync(BotResponse message, KernelProcess? chatProcess)
+        public override async Task<List<BotResponse>> InteractAsync(BotResponse message, KernelProcess? chatProcess)
         {
+            var respList = new List<BotResponse>();
             var rep = await StartProcessAsync(chatProcess!, message);
             var history = await _kernel.Services.GetRequiredService<IChatHistoryProvider>().GetHistoryAsync();
-            var bresp = new BotResponse { Content = history.Last().Content!, ContentType = BotResponseContentType.Text };
+            var assistantMessages = GetLastAssistantMessages(history);
+            foreach (var assistantMessage in assistantMessages)
+            {
+                var bresp = new BotResponse
+                {
+                    Content = assistantMessage.Content!,
+                    ContentType = BotResponseContentType.Text
+                };
+                respList.Add(bresp);
+            }
             var reducedMessages = await _historyReducer!.ReduceAsync(history);
             if (reducedMessages is not null)
             {
                 history.Clear();
                 history.AddRange(reducedMessages);
             }
-            return bresp;
+            return respList;
+        }
+
+        /// <summary>
+        /// Get the last assistant messages from the chat history.
+        /// <remarks>Often several assistant messages are emitted as a block. Isolate that block.</remarks>
+        /// </summary>
+        /// <param name="history"></param>
+        /// <returns></returns>
+        private IList<ChatMessageContent> GetLastAssistantMessages(ChatHistory history)
+        {
+            var list = new List<ChatMessageContent>();
+            foreach (var message in history.Reverse())
+            {
+                if (message is ChatMessageContent chatMessage && chatMessage.Role == AuthorRole.Assistant)
+                {
+                    list.Add(chatMessage);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            list.Reverse();
+            return list;
         }
 
         public override async Task<LocalKernelProcessContext> StartProcessAsync(KernelProcess kernelProcess, BotResponse initialText)

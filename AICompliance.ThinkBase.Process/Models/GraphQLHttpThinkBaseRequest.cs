@@ -1,11 +1,8 @@
-﻿using GraphQL.Client.Abstractions;
+﻿// Copyright (c) 2025 AI Compliance inc. Licensed under the MIT License.
+using GraphQL.Client.Abstractions;
 using GraphQL.Client.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AICompliance.ThinkBase.Process.Models
 {

@@ -31,7 +31,7 @@ namespace ThinkBase.Process.Demo.Processes
             throw new NotImplementedException();
         }
 
-        public virtual Task<BotResponse> InteractAsync(BotResponse message, KernelProcess? chatProcess)
+        public virtual Task<List<BotResponse>> InteractAsync(BotResponse message, KernelProcess? chatProcess)
         {
             throw new NotImplementedException();
         }

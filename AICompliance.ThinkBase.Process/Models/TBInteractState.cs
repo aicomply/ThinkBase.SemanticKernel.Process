@@ -1,4 +1,5 @@
-﻿using Microsoft.SemanticKernel.ChatCompletion;
+﻿// Copyright (c) 2025 AI Compliance inc. Licensed under the MIT License.
+using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace AICompliance.ThinkBase.Process.Models
 {

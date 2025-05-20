@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) 2025 AI Compliance inc. Licensed under the MIT License.using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AICompliance.ThinkBase.Process.Models
 {

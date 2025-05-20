@@ -43,9 +43,12 @@ namespace ThinkBase.Process.Demo.Connectivity
                     process = _proc.GetProcess();
                     conversations[options.ConversationId] = process; // Will reset for multiple members. problem?
                 }
-                botresponse = await _proc.InteractAsync(UserMessage, process);
+                var botresponses = await _proc.InteractAsync(UserMessage, process);
                 var resp = new ChatResponse { ConversationId = options.ConversationId, CreatedAt = DateTimeOffset.Now, FinishReason = ChatFinishReason.Stop };
-                resp.Messages.Add(new ChatMessage(ChatRole.Assistant, botresponse.Content));
+                foreach(var response in botresponses)
+                {
+                    resp.Messages.Add(new ChatMessage(ChatRole.Assistant, response.Content));
+                }
                 return resp;
             }
             else //represents a new conversation

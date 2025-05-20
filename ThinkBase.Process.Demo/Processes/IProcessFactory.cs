@@ -9,7 +9,7 @@ namespace ThinkBase.Process.Demo.Processes
         string DiscriminatorPrompt { get; }
         KernelProcess? GetProcess();
         ProcessBuilder GetProcessBuilder();
-        Task<BotResponse> InteractAsync(BotResponse message, KernelProcess? chatProcess);
+        Task<List<BotResponse>> InteractAsync(BotResponse message, KernelProcess? chatProcess);
         Task<LocalKernelProcessContext> StartProcessAsync(KernelProcess kernelProcess, BotResponse initialText);
 
     }
