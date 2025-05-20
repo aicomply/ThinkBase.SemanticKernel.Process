@@ -21,6 +21,14 @@
                 Otherwise, set Complete to true and provide a response.
                 """;
 
+        public const string KGraphInfoInstructions =
+            """
+                You are an agent responding to requests for information about the Knowledge Graphs available.
+                Summarize the following items using the name and description and format them to describe what intelligent knowledge graphs are available.
 
+                 {{ KGMetadataPlugin.GetKGInfo }}
+
+                 Don't mention the Initial texts as they are for internal use only.
+                """;
     }
 }

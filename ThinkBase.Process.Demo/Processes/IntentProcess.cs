@@ -43,6 +43,7 @@ namespace ThinkBase.Process.Demo.Processes
             var thinkbaseStep = process.AddStepFromType<ThinkBaseStep>();
             var userInputStep = process.AddStepFromType<UserInputStep>();
             var interactStep = process.AddStepFromType<InteractionStep>();
+            var KGinfoStep = process.AddStepFromType<DescribeKGraphsStep>();
 
             process.OnInputEvent(Events.StartProcess)
                 .SendEventTo(new ProcessFunctionTargetBuilder(intentStep, IntentStep.Functions.InvokeAgent));
@@ -59,6 +60,10 @@ namespace ThinkBase.Process.Demo.Processes
                 .OnEvent(ThinkBaseStepEvents.ThinkBaseInteract)
                 .SendEventTo(new ProcessFunctionTargetBuilder(thinkbaseStep));
 
+            intentStep
+                .OnEvent(Events.DescribeKGraphRequest)
+                .SendEventTo(new ProcessFunctionTargetBuilder(KGinfoStep));
+
             thinkbaseStep
                 .OnEvent(ThinkBaseStepEvents.Exit)
                 .SendEventTo(new ProcessFunctionTargetBuilder(intentStep, IntentStep.Functions.ResetStatus))
@@ -69,8 +74,13 @@ namespace ThinkBase.Process.Demo.Processes
                 .SendEventTo(new ProcessFunctionTargetBuilder(userInputStep, UserInputStep.Functions.WaitForUserInput));
 
             interactStep
-            .OnEvent(Events.Exit)
-            .StopProcess();
+                .OnEvent(Events.Exit)
+                .StopProcess();
+
+            KGinfoStep
+                .OnEvent(Events.Exit)
+                .StopProcess();
+
 
             void AttachErrorStep(ProcessStepBuilder step, params string[] functionNames)
             {

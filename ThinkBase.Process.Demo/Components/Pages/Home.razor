@@ -2,5 +2,19 @@
 @using AIComply.Blazor.Chat.Chat
 
 <PageTitle>ThinkBase Process Demo</PageTitle>
+<FluentGrid>
+    <FluentGridItem xs="12" sm="6">
+        <FluentCard>
+            <h1>ThinkBase Process Demo</h1>
+            <p>This demo illustrates how you can call ThinkBase intelligent Knowledge graphs inside Microsoft Semantic Kernel, using LLMs for intent processing.</p>
+            <p>Using Semantic Kernel Processes, this demo can answer general questions, but also call  a set of knowledge graphs implemented on the ThinkBase.ai SaaS site.</p>
+            <p>These knowledge graphs use embedded fuzzy rule sets to generate graph traversals to seek to satisfy a target node.</p>
+            <p>In so doing, they ask the user questions and use the responses to iterate towards that target. </p>
+            <p>The functionality is embedded in a single Semantic Kernel process step, which you can include in your projects.</p>
+            <p>The code for the process step and this demo can be found at <a href="https://github.com/aicomply/ThinkBase.SemanticKernel.Process">this repo.</a></p>
+            <p>You can get a description of the available knowledge graphs by just asking about them.</p>
+        </FluentCard>
+    </FluentGridItem>
+</FluentGrid>
 
 <Chat/>

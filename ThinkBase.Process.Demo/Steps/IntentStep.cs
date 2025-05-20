@@ -77,11 +77,16 @@ public class IntentStep : KernelProcessStep<IntentStepState>
             logger.LogInformation($"*** IntentStep inferred {userInput.Content} was a request for Interaction handling");
             await context.EmitEventAsync(new() { Id = Events.InteractionRequest });
         }
-        else if (formattedResponse!.KnowledgeGraph)
+        else if (formattedResponse.KnowledgeGraphDescribe)
+        {
+            logger.LogInformation($"*** IntentStep inferred {userInput.Content} was a request for KG info");
+            await context.EmitEventAsync(new() { Id = Events.DescribeKGraphRequest });
+        }
+        else if (formattedResponse!.KnowledgeGraphFunction)
         {
             _state.InSubProcess = true;
             _state.NextEvent = ThinkBaseStepEvents.ThinkBaseInteract;
-            logger.LogInformation($"*** IntentStep inferred {userInput.Content} was a request for KG info");
+            logger.LogInformation($"*** IntentStep inferred {userInput.Content} was a request for a KG to run.");
             //extract the name and initial text and pass on.
             _state.GraphName = formattedResponse.Name;
             _state.InitialText = formattedResponse.InitialText;
@@ -97,8 +102,13 @@ public class IntentStep : KernelProcessStep<IntentStepState>
         [Description("Specifies that the user's input is a simple interaction such as hello. ")]
         public bool Interaction { get; set; }
 
-        [Description("Specifies that the user's input is a request for one of the knowledge graphs. ")]
-        public bool KnowledgeGraph { get; set; }
+        /// <summary>
+        /// Specifies that the user's input is a request to describe the available knowledge graphs.
+        /// </summary>
+        public bool KnowledgeGraphDescribe { get; set; } = false;
+
+        [Description("Specifies that the user's input is a request for one of the knowledge graphs to run. ")]
+        public bool KnowledgeGraphFunction { get; set; }
 
         [Description("Specifies the name of the Knowledge graph to use. ")]
         public string Name { get; set; } = string.Empty;
