@@ -4,6 +4,16 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Title>Semantic Kernel process step that interrogates a ThinkBase Knowledge Graph.</Title>
+    <Copyright>(c) AI Compliance inc.</Copyright>
+    <PackageProjectUrl>https://semanticdemo.thinkbase.ai/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/aicomply/ThinkBase.SemanticKernel.Process</RepositoryUrl>
+    <PackageTags>AI; Semantic Kernel; process step; Knowledge Graph;</PackageTags>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <IncludeSymbols>True</IncludeSymbols>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>ThinkbaseLogo_192.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,13 +31,30 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
     <PackageReference Include="GraphQL.Client" Version="6.1.0" />
     <PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.1.0" />
-    <PackageReference Include="MarkdownToPdf" Version="1.0.0-beta" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.4" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.50.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Process.Core" Version="1.50.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.54.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Process.Core" Version="1.54.0-alpha" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="ThinkbaseLogo_192.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

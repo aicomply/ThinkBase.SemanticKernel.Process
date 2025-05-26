@@ -81,7 +81,11 @@ namespace AICompliance.ThinkBase.Process.Models
             /// <summary>
             /// signals a process is complete
             /// </summary>
-            complete
+            complete,
+            /// <summary>
+            /// Signals a process has been terminated
+            /// </summary>
+            terminated
         }
 
         /// <summary>

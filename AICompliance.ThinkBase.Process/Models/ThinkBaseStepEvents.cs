@@ -6,6 +6,6 @@ namespace AICompliance.ThinkBase.Process.Models
     {
         public static readonly string Exit = nameof(Exit);
         public static readonly string ThinkBaseInteract = nameof(ThinkBaseInteract);
-
+        public static readonly string CustomResponseHandling = nameof(CustomResponseHandling);
     }
 }

@@ -8,9 +8,9 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using GraphQL.Client.Http;
 using System.Reflection;
 using Azure.Storage.Blobs;
-using Orionsoft.MarkdownToPdfLib;
 using GraphQL.Client.Serializer.SystemTextJson;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AICompliance.ThinkBase.Process.Steps
 {
@@ -66,7 +66,7 @@ namespace AICompliance.ThinkBase.Process.Steps
                     $$"""
                     {
                       interactKnowledgeGraph(kgModelName: "{{modelName}}", conversationId: "{{_state.ConversationId}}", conversationData: 
-                        {name: "" value: "{{text}}" dataType: textual})
+                        {name: "" value: "{{text}}" dataType: TEXTUAL})
                       { 
                         response 
                         { 
@@ -97,12 +97,12 @@ namespace AICompliance.ThinkBase.Process.Steps
 
                 foreach (var response in responses.Data.interactKnowledgeGraph)
                 {
-                    var outText = await CreateActivity(response, config);
+                    var outText = await CreateActivity(response, config, context);
                     if(!_state.Complete)
                     {
                         _state.ChatHistory!.AddAssistantMessage(outText);
+                        message.History.AddAssistantMessage( outText);
                     }
-                    message.History.AddAssistantMessage( outText);
                     logger.LogInformation($"In ThinkBaseStep. Interaction response: {outText} ");
                 }
                 if (_state.Complete || _state.Cycles > MaxCycles)
@@ -142,7 +142,7 @@ namespace AICompliance.ThinkBase.Process.Steps
             var sb = new StringBuilder();
             foreach (var item in r.response.categories)
             {
-                sb.AppendLine($"{{\"type\": \"Action.Submit\",\"title\": \"{item.name}\"}},");
+                sb.AppendLine($"{{\"type\": \"Action.Submit\",\"title\": \"{item.name}\", \"data\": {{ \"name\": \"{item.name}\" }} }},");
             }
             sb.Remove(sb.Length - 1, 1);
             source = source.Replace("**CategoryButtons**", sb.ToString());
@@ -159,7 +159,7 @@ namespace AICompliance.ThinkBase.Process.Steps
         }
 
 
-        private async Task<string> CreateActivity(InteractResponse r, IConfiguration config)
+        private async Task<string> CreateActivity(InteractResponse r, IConfiguration config, KernelProcessStepContext context)
         {
             string m = "internal error";
             switch (r.response.dataType)
@@ -176,9 +176,15 @@ namespace AICompliance.ThinkBase.Process.Steps
                     {
                         if (!string.IsNullOrEmpty(r.response.value))
                         {
-                            var link = await CreatePDF(r.response.value, config);
-                            m = CreateFeedbackCard(link);
+                            //By processing this event you can pass the response to an external system, such as a web service or a database.
+                            await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.CustomResponseHandling, Data = r });
                         }
+                        _state.Complete = true;
+                    }
+                    break;
+                case DarlVar.DataType.terminated:
+                    {
+                        m = "The Intelligent Knowledge Graph has been terminated.";
                         _state.Complete = true;
                     }
                     break;
@@ -194,33 +200,6 @@ namespace AICompliance.ThinkBase.Process.Steps
             return m;
         }
 
-        public async Task<string> CreatePDF(string source, IConfiguration config)
-        {
-            //create a pdf
-            var pdf = new MarkdownToPdf();
-            var header = string.Empty;
-            var footer = string.Empty;
-            try
-            {
-                header = new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream("AICompliance.ThinkBase.Process.MarkDown.header.md")!).ReadToEnd();
-                footer = new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream("AICompliance.ThinkBase.Process.MarkDown.footer.md")!).ReadToEnd();
-            }
-            catch { }
-            header = header.Replace("$title", config["HeaderTitle"] ?? "Report");
-            // insert the source
-            pdf.Add(header);
-            pdf.Add(source);
-            pdf.Add(footer);
-            using MemoryStream ms = new();
-            pdf.Save(ms);
-            ms.Position = 0;
-            var name = Guid.NewGuid().ToString() + ".pdf";
-            BlobContainerClient container = new(config["StorageConnectionString"], config["ReportContainer"]);
-            var b = container.GetBlobClient(name);
-            await b.UploadAsync(ms, true);
-            ms.Dispose();
-            return config["StaticBlobSite"] + name;
-        }
     }
 #pragma warning restore SKEXP0080
 #pragma warning restore SKEXP0001

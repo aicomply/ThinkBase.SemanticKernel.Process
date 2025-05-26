@@ -121,10 +121,15 @@ public class IntentStep : KernelProcessStep<IntentStepState>
 
 
     [KernelFunction(Functions.ResetStatus)]
-    public void ResetStatus(KernelProcessStepContext context, Kernel kernel, ILogger logger)
+    public async Task ResetStatusAsync(KernelProcessStepContext context, Kernel kernel, ILogger logger, ChatHistory localhistory)
     {
+        IChatHistoryProvider historyProvider = kernel.GetHistory();
+        ChatHistory history = await historyProvider.GetHistoryAsync();
+        history.Clear();
+        history.AddRange(localhistory);
         logger.LogInformation($"*** IntentStep: Sub-process completed. Reverting to top level.");
         _state!.InSubProcess = false;
+        await historyProvider.CommitAsync();
     }
 
 

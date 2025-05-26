@@ -6,7 +6,8 @@
       "type": "TextBlock",
       "size": "medium",
       "weight": "bolder",
-      "text": "**text**"
+      "text": "**text**",
+      "wrap": true
     }
   ],
   "actions": [
