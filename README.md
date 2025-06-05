@@ -27,6 +27,13 @@ The ThinkBase process step encapsulates and interrogates a knowledge graph exist
 The ThinkBase process code step defines a couple of events. One calling for more data, and the other reporting the process has completed. To integrate the ThinkBase Step into your processes, you need only call the step, and reroute all responses to that step until the exit event is generated.
 The step uses ChatHistory to pass new requests to the user. The process pauses until data is returned. 
 
+## Nuget package
+The process step is available as a Nuget package.
+
+```
+dotnet add package AICompliance.ThinkBase.Process 
+```
+
 ## The demo website
 
 In order to demonstrate this, a demo website is included. This can be seen running at:[https://semanticdemo.thinkbase.ai](https://semanticdemo.thinkbase.ai)
