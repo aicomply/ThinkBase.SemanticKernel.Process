@@ -11,11 +11,11 @@
     <PackageReference Include="AIComply.Blazor.Chat" Version="1.0.5" />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.11.9" />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.11.9" />
-    <PackageReference Include="Microsoft.SemanticKernel.Process.Core" Version="1.54.0-alpha" />
-    <PackageReference Include="Microsoft.SemanticKernel.Process.LocalRuntime" Version="1.54.0-alpha" />
-    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.54.0" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.54.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Plugins.OpenApi.Extensions" Version="1.54.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Process.Core" Version="1.55.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Process.LocalRuntime" Version="1.55.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.55.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.55.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Plugins.OpenApi.Extensions" Version="1.55.0-alpha" />
 
   </ItemGroup>
 

@@ -98,11 +98,8 @@ namespace AICompliance.ThinkBase.Process.Steps
                 foreach (var response in responses.Data.interactKnowledgeGraph)
                 {
                     var outText = await CreateActivity(response, config, context);
-                    if(!_state.Complete)
-                    {
-                        _state.ChatHistory!.AddAssistantMessage(outText);
-                        message.History.AddAssistantMessage( outText);
-                    }
+                    _state.ChatHistory!.AddAssistantMessage(outText);
+                    message.History.AddAssistantMessage( outText);
                     logger.LogInformation($"In ThinkBaseStep. Interaction response: {outText} ");
                 }
                 if (_state.Complete || _state.Cycles > MaxCycles)

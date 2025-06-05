@@ -10,8 +10,12 @@
 
                 {{ KGMetadataPlugin.GetKGInfo }}
 
-                Decide if one of the items could answer the user's query.
-                If so, set KnowledgeGraph to 'true' and set the name and initial text to the name and initial text of the item.
+                Decide if  the user is:
+                
+                Asking for information about which Knowledge Graphs are available. If so, set KnowledgeGraphDescribe to 'true'.
+
+                Asking to use one of the knowledge graphs. If so, set KnowledgeGraphFunction to 'true' and set the name and initial text to the name and initial text of the item.
+
                 Otherwise choose the Interaction value to set to 'true'.
         """;
         public const string SimpleInteractionInstructions =
