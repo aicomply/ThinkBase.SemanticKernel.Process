@@ -107,6 +107,7 @@ namespace AICompliance.ThinkBase.Process.Steps
                     logger.LogInformation($"In ThinkBaseStep. Interactions completed. ");
                     await context.EmitEventAsync(new() { Id = ThinkBaseStepEvents.Exit, Data = message.History });
                     _state.ChatHistory.Clear();
+                    _state.ConversationId = Guid.NewGuid().ToString(); // Reset conversation ID for next interaction
                     _state.Complete = false;
                     _state.Cycles = 0;
                 }
